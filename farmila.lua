@@ -53,7 +53,7 @@ local version = 1
 local version_text = "1.00"
 local script_path = thisScript().path
 
-local script_url = "https://raw.githubusercontent.com/theresnopixels/SAScripts/main/autoupdate.lua"
+local script_url = "https://raw.githubusercontent.com/theresnopixels/SAScripts/main/farmila.lua"
 local update_path = getWorkingDirectory() .. "/update.ini"
 local update_url = "https://raw.githubusercontent.com/theresnopixels/SAScripts/main/update.ini"
 
@@ -337,6 +337,8 @@ function main()
 	apply_custom_style()
 	
 	lAfk.v = config.settings.lAfk
+	
+	-- POSHEL NAHUI
 
 	while true do
 		wait(0)
@@ -353,7 +355,7 @@ function main()
 				if update_state then
 					downloadUrlToFile(script_url, script_path, function(id, status)
 						if status == dlstatus.STATUS_ENDDOWNLOADDATA then
-							sampShowDialog(1000, "Обновление", "Скрипт был успешно обновлен!", "Окей", "", 0)
+							sampShowDialog(1003, "Обновление", "Скрипт был успешно обновлен!", "Окей", "", 0)
 							thisScript():reload()
 						end
 					end)
@@ -378,7 +380,7 @@ function updater()
 					first_update_notification = false
 				end
 			end
-			os.remove(update_path)
+			--os.remove(update_path)
 		end)
 		wait(5000)
 	end
