@@ -1,5 +1,6 @@
-script_name('PD Script')
-script_author('Takaxasi')
+script_name("Mortal's farmila script")
+script_author("Mortal")
+script_description("Farmila to farm money")
 
 -- >>>>>>>> REQUIRES
 require "lib.moonloader"
@@ -117,7 +118,7 @@ rentItems = {}
 moneyToChart = {}
 rentEarnings = {}
 
-local notificationSound = loadAudioStream("https://cdn.pixabay.com/audio/2021/08/04/audio_bb630cc098.mp3")
+local notificationSound = loadAudioStream("moonloader/resource/Farmila/notf.mp3")
 
 function loadRentEarnings()
 	local file = io.open(rentEarningPath, "r")
@@ -331,6 +332,8 @@ function main()
 	
 	config.mainInfo.rouletteBox = 5
 	
+	sampRegisterChatCommand("update", cmd_update)
+	
 	-- load settings
 	autoLomka.v = config.settings.autolomka
 	themeSelected = config.settings.theme
@@ -338,7 +341,6 @@ function main()
 	
 	lAfk.v = config.settings.lAfk
 	
-	-- POSHEL NAHUI
 
 	while true do
 		wait(0)
@@ -374,15 +376,32 @@ function updater()
 		downloadUrlToFile(update_url, update_path, function(id, status)
 			if status == dlstatus.STATUS_ENDDOWNLOADDATA then
 				updateIni = inicfg.load(nil, update_path)
-				if tonumber(updateIni.info.version) > version then
-					sampShowDialog(1000, "Обновление", "Доступна новая версия скрипта Farmila v"..updateIni.info.version_text, "Обновить", "Закрыть", 0)
-					update_state = true
-					first_update_notification = false
+				if updateIni ~= nil then
+					if tonumber(updateIni.info.version) > version then
+						sampShowDialog(1000, "Обновление", "Доступна новая версия скрипта Farmila v"..updateIni.info.version_text, "Обновить", "Закрыть", 0)
+						update_state = true
+						first_update_notification = false
+					end
+				else
+					print("UpdateIni is nil")
 				end
 			end
 			--os.remove(update_path)
 		end)
-		wait(5000)
+		wait(30000)
+	end
+end
+
+function cmd_update()
+	if update_state then
+		downloadUrlToFile(script_url, script_path, function(id, status)
+			if status == dlstatus.STATUS_ENDDOWNLOADDATA then
+				sampShowDialog(1003, "Обновление", "Скрипт был успешно обновлен!", "Окей", "", 0)
+				thisScript():reload()
+			end
+		end)
+	else
+		sampAddChatMessage("[ERROR] Новые обновления не найдены :(", 0xFF4444)
 	end
 end
 
