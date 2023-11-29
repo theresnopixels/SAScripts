@@ -50,8 +50,8 @@ u8 = encoding.UTF8
 
 update_state = false
 
-local version = 3
-local version_text = "1.02"
+local version = 4
+local version_text = "1.03"
 local script_path = thisScript().path
 
 local script_url = "https://raw.githubusercontent.com/theresnopixels/SAScripts/main/farmila.lua"
@@ -80,7 +80,6 @@ local currentAdTime = 0
 local skipDialog = false
 local discoveringBuissneses = false
 local notifyText = "Тут пусто, хм.."
-local boxProcessorStatus = false
 local phoneNumberHook = false
 
 -- DATA
@@ -96,10 +95,6 @@ config = {
 	mainInfo = {
 		lastConnect = "",
 		onConnectMoney = 0,
-		rouletteBox = -1,
-		platinumBox = -1,
-		secretLosSantosBox = -1,
-		secretElonMuskBox = -1,
 	},
 	vipChat = {
 		vr_text = "",
@@ -327,13 +322,11 @@ function main()
 	dateViewer = lua_thread.create_suspended(dateViewer)
 	vrProcessor = lua_thread.create_suspended(vrProcessor)
 	rentProcessor = lua_thread.create_suspended(rentProcessor)
-	boxProcessor = lua_thread.create_suspended(boxProcessor)
 	updater = lua_thread.create_suspended(updater)
 	updater:run()
 	vrProcessor:run()
 	rentProcessor:run()
 	
-	config.mainInfo.rouletteBox = 5
 	
 	sampRegisterChatCommand("update", cmd_update)
 	
@@ -431,23 +424,6 @@ function events.onServerMessage(color, text)
 			rentEarnings[currentDate] = tonumber(price)
 		end
 		saveRentEarning()
-	end
-	
-	if string.find(text, "Вы использовали") then
-		if string.find(text, "Вы использовали сундук с рулетками") then
-			config.mainInfo.rouletteBox = 120 * 60
-		elseif string.find(text, "Вы использовали платиновый сундук") then
-			config.mainInfo.platinumBox = 120 * 60
-		elseif string.find(text, "Вы использовали Тайник Лос Сантоса") then
-			config.mainInfo.secretLosSantosBox = 60 * 60
-		elseif string.find(text, "Вы использовали тайник Илона Маска") then
-			config.mainInfo.secretElonMuskBox = 120 * 60
-		end
-		saveJson()
-		if boxProcessorStatus == false then
-			boxProcessorStatus = true
-			boxProcessor:run()
-		end
 	end
 	
 	if string.find(text, "У вас началась сильная ломка") then
@@ -606,84 +582,6 @@ function rentProcessor()
 	end
 end
 
-function boxProcessor()
-	local totalDone = 0
-	while boxProcessor do
-		if config.mainInfo.rouletteBox ~= -1 then
-			if config.mainInfo.rouletteBox > 1 then
-				config.mainInfo.rouletteBox = config.mainInfo.rouletteBox - 1
-			else
-				notifyText = "Кейс рулетки готов к повторному использованию!"
-				notification_window_state.v = true
-				imgui.Process = true
-				wait(5000)
-				notification_window_state.v = false
-				if main_window_state.v == false then
-					imgui.Process = false
-				end
-				totalDone = totalDone + 1
-				config.mainInfo.rouletteBox = -1
-				
-			end
-		end
-		
-		if config.mainInfo.platinumBox ~= -1 then
-			if config.mainInfo.platinumBox > 1 then
-				config.mainInfo.platinumBox = config.mainInfo.platinumBox - 1
-			else
-				notifyText = "Платиновый кейс готов к повторному использованию!"
-				notification_window_state.v = true
-				imgui.Process = true
-				wait(5000)
-				notification_window_state.v = false
-				if main_window_state.v == false then
-					imgui.Process = false
-				end
-				totalDone = totalDone + 1
-				config.mainInfo.platinumBox = -1
-			end
-		end
-		
-		if config.mainInfo.secretLosSantosBox ~= -1 then
-			if config.mainInfo.secretLosSantosBox > 1 then
-				config.mainInfo.secretLosSantosBox = config.mainInfo.secretLosSantosBox - 1
-			else
-				notifyText = "Тайник Лос-Сантоса готов к повторному использованию!"
-				notification_window_state.v = true
-				imgui.Process = true
-				wait(5000)
-				notification_window_state.v = false
-				if main_window_state.v == false then
-					imgui.Process = false
-				end
-				totalDone = totalDone + 1
-				config.mainInfo.secretLosSantosBox = -1
-			end
-		end
-		
-		if config.mainInfo.secretElonMuskBox ~= -1 then
-			if config.mainInfo.secretElonMuskBox > 1 then
-				config.mainInfo.secretElonMuskBox = config.mainInfo.secretElonMuskBox - 1
-			else
-				notifyText = "Тайник Илона Маска готов к повторному использованию!"
-				notification_window_state.v = true
-				imgui.Process = true
-				wait(5000)
-				notification_window_state.v = false
-				if main_window_state.v == false then
-					imgui.Process = false
-				end
-				totalDone = totalDone + 1
-				config.mainInfo.secretElonMuskBox = -1
-			end
-			if totalDone == 4 then
-				boxProcessor = false
-			end
-		end
-		saveJson()
-		wait(1000)
-	end
-end
 
 -- END OF EVENTS
 
