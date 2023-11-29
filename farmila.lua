@@ -50,8 +50,8 @@ u8 = encoding.UTF8
 
 update_state = false
 
-local version = 2
-local version_text = "1.01"
+local version = 3
+local version_text = "1.02"
 local script_path = thisScript().path
 
 local script_url = "https://raw.githubusercontent.com/theresnopixels/SAScripts/main/farmila.lua"
