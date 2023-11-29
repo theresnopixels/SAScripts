@@ -50,8 +50,8 @@ u8 = encoding.UTF8
 
 update_state = false
 
-local version = 4
-local version_text = "1.03"
+local version = 5
+local version_text = "1.04"
 local script_path = thisScript().path
 
 local script_url = "https://raw.githubusercontent.com/theresnopixels/SAScripts/main/farmila.lua"
@@ -436,7 +436,7 @@ function events.onServerMessage(color, text)
 		sampSendChat("/lafk")
 	end
 	
-	local words = {"возьму", "супер%-кирка", "супер%-кирку", "супер%-грабли", "кирка", "супер", "кирку", "грабли", "аренду","дфт"}
+	local words = {"возьму", "супер%-кирка", "супер%-кирку", "супер%-грабли", "кирка", "супер", "кирку", "грабли", "аренду","дфт", "DFT", "DFT-30"}
 
 	for _, word in ipairs(words) do
 		if string.find(text, word) then
