@@ -70,6 +70,7 @@ local vr_cooldown = imgui.ImInt(0)
 -- settings
 local autoLomka = imgui.ImBool(false)
 local lAfk = imgui.ImBool(false)
+local numberToCb = imgui.ImBool(false)
 
 -- VARIABLES
 local isAdEnabled = false
@@ -80,6 +81,7 @@ local skipDialog = false
 local discoveringBuissneses = false
 local notifyText = "Тут пусто, хм.."
 local boxProcessorStatus = false
+local phoneNumberHook = false
 
 -- DATA
 
@@ -109,7 +111,8 @@ config = {
 	settings = {
 		autolomka = false,
 		theme = 0,
-		lAfk = true
+		lAfk = true,
+		numberToClipboard = false
 	}
 }
 lastWeekData = {}
@@ -394,12 +397,7 @@ end
 
 function cmd_update()
 	if update_state then
-		downloadUrlToFile(script_url, script_path, function(id, status)
-			if status == dlstatus.STATUS_ENDDOWNLOADDATA then
-				sampShowDialog(1003, "Обновление", "Скрипт был успешно обновлен!", "Окей", "", 0)
-				thisScript():reload()
-			end
-		end)
+		sampShowDialog(1000, "Обновление", "Доступна новая версия скрипта Farmila v"..updateIni.info.version_text, "Обновить", "Закрыть", 0)
 	else
 		sampAddChatMessage("[ERROR] Новые обновления не найдены :(", 0xFF4444)
 	end
@@ -462,18 +460,36 @@ function events.onServerMessage(color, text)
 		sampSendChat("/lafk")
 	end
 	
-	local words = {"возьму", "супер%-кирка", "супер%-грабли", "кирка", "супер", "кирку", "грабли", "аренду"}
+	local words = {"возьму", "супер%-кирка", "супер%-кирку", "супер%-грабли", "кирка", "супер", "кирку", "грабли", "аренду","дфт"}
 
 	for _, word in ipairs(words) do
 		if string.find(text, word) then
 			sampAddChatMessage(string.gsub(text, word, "{FF4444}"..word.."{FFFFFF}"), color)
 			setAudioStreamVolume(notificationSound, 15.0)
 			setAudioStreamState(notificationSound, ev.PLAY)
+			
+			if config.settings.numberToClipboard then
+				local pattern = "%[([^%]]+)%]%:"
+				local phoneNumber = string.match(text, pattern)
+				if phoneNumber ~= nil then
+					phoneNumberHook = true
+					sampSendChat("/number "..phoneNumber)
+				end
+			end
 			return false
 		end
 	end
 	
+	if phoneNumberHook and config.settings.numberToClipboard then
 	
+		local pattern = "{33CCFF}(%d+)"
+		
+		if string.match(text, pattern) ~= nil then
+			setClipboardText("/call "..string.match(text, pattern))
+			phoneNumberHook = false
+			sampAddChatMessage("{33CCFF}[NUMBER] {FFFFFF} Номер был скопирован в буфер обмена! Номер - {33CCFF}"..string.match(text, pattern), -1)
+		end
+	end
 end
 
 function events.onShowDialog(dialogId, style, title, button1, button2, text)
@@ -1363,6 +1379,17 @@ function imgui.OnDrawFrame()
 					if imgui.IsItemHovered() then
 						imgui.BeginTooltip()
 						imgui.Text(u8"Отключает антиафк при спавне")
+						imgui.EndTooltip()
+					end
+					
+					if imgui.Checkbox(u8'Номера из /vr', numberToCb) then
+						config.settings.numberToClipboard = numberToCb.v
+						saveJson()
+					end
+					
+					if imgui.IsItemHovered() then
+						imgui.BeginTooltip()
+						imgui.Text(u8"Копирует номера игроков из /vr, если в строке было найдено нужное слово")
 						imgui.EndTooltip()
 					end
 				
